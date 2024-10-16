@@ -3,17 +3,22 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Sellers extends Model {
+  class Seller extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      Seller.associate = function(models) {
+        Seller.hasMany(models.Game, { foreignKey: 'seller_id' });
+        Seller.hasMany(models.FinancialStatement, { foreignKey: 'seller_id' });
+        Seller.hasMany(models.Deposits, { foreignKey: 'seller_id' });
+        Seller.hasMany(models.Sales, { foreignKey: 'seller_id' });
+      };
     }
   }
-  Sellers.init({
+  Seller.init({
     seller_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -23,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
     phone: DataTypes.STRING
   }, {
     sequelize,
-    modelName: 'Sellers',
+    modelName: 'Seller',
   });
   return Sellers;
 };

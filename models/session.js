@@ -10,7 +10,13 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      Session.hasMany(models.Stock, {
+        foreignKey: 'session_id'
+      });
+      Session.hasMany(models.Deposit, {
+        foreignKey: 'session_id'
+      });
+      
     }
   }
   Session.init({
