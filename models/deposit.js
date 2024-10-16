@@ -1,0 +1,24 @@
+'use strict';
+const {
+  Model
+} = require('sequelize');
+module.exports = (sequelize, DataTypes) => {
+  class Deposit extends Model {
+    /**
+     * Helper method for defining associations.
+     * This method is not a part of Sequelize lifecycle.
+     * The `models/index` file will call this method automatically.
+     */
+    static associate(models) {
+      // define association here
+    }
+  }
+  Deposit.init({
+    seller_id: DataTypes.INTEGER,
+    total_deposit_fee: DataTypes.DECIMAL
+  }, {
+    sequelize,
+    modelName: 'Deposit',
+  });
+  return Deposit;
+};
