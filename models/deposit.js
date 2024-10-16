@@ -14,7 +14,13 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Deposit.init({
+    deposit_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement},
+    deposit_date: DataTypes.DATE,
     seller_id: DataTypes.INTEGER,
+    session_id: DataTypes.INTEGER,
     total_deposit_fee: DataTypes.DECIMAL
   }, {
     sequelize,

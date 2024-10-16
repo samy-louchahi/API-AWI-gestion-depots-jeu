@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Session.init({
+    session_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement},
     name: DataTypes.STRING,
     start_date: DataTypes.DATE,
     end_date: DataTypes.DATE,

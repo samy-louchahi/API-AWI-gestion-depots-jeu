@@ -14,10 +14,14 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Buyer.init({
+    buyer_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement},
     name: DataTypes.STRING,
     email: DataTypes.STRING,
     phone: DataTypes.STRING,
-    address: DataTypes.STRING
+    address: DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'Buyer',

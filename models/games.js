@@ -14,9 +14,15 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Games.init({
+    game_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement},
     name: DataTypes.STRING,
     publisher: DataTypes.STRING,
-    deposit_fee: DataTypes.FLOAT
+    price: DataTypes.DECIMAL,
+    seller_id: DataTypes.INTEGER,
+    stock_id: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Games',

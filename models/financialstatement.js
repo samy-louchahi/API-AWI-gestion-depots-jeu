@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   FinancialStatement.init({
+    statement_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement},
     tot_deposit_fees: DataTypes.DECIMAL,
     tot_commission: DataTypes.DECIMAL,
     tot_sales: DataTypes.DECIMAL,

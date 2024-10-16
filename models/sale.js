@@ -14,10 +14,17 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Sale.init({
+    sale_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement},
     game_id: DataTypes.INTEGER,
     sale_price: DataTypes.DECIMAL,
     sale_date: DataTypes.DATE,
-    commission: DataTypes.DECIMAL
+    commission: DataTypes.DECIMAL,
+    seller_id: DataTypes.INTEGER,
+    buyer_id: DataTypes.INTEGER || null,
+    session_id: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Sale',

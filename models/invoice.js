@@ -14,10 +14,13 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Invoice.init({
+    invoice_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement},
     date: DataTypes.DATE,
-    somme_tot: DataTypes.DECIMAL,
-    buyers_id: DataTypes.INTEGER,
-    sellers_id: DataTypes.INTEGER
+    amount: DataTypes.DECIMAL,
+    sale_id: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Invoice',

@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Stock.init({
+    stock_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement},
     quant_tot: DataTypes.INTEGER,
     quant_vendues: DataTypes.INTEGER,
     quant_dispo: DataTypes.INTEGER,
