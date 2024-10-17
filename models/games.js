@@ -10,11 +10,10 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Games.associate = function(models) {
         Games.belongsTo(models.Seller, { foreignKey: 'seller_id' }); // a game belongs to a seller
         Games.belongsTo(models.Stock, { foreignKey: 'stock_id' }); // a game belongs to a stock
-        Games.hasOne(models.Sale, { foreignKey: 'game_id' }); // a game has many sales
-      };
+        Games.hasOne(models.Sale, { foreignKey: 'game_id', allowNull: true }); // a game can have one sale or no sale
+        Games.hasOne(models.SalesOperation, { foreignKey: 'game_id', allowNull: true }); // a game can have one sales operation or no sales operation
     }
   }
   Games.init({

@@ -10,10 +10,7 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Invoice.associate = function(models) {
         Invoice.belongsTo(models.Sales, { foreignKey: 'sale_id' });
-      };
-      
     }
   }
   Invoice.init({

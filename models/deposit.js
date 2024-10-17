@@ -10,10 +10,8 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Deposit.associate = function(models) {
         Deposit.belongsTo(models.Sellers, { foreignKey: 'seller_id' });
         Deposit.belongsTo(models.Session, { foreignKey: 'session_id' });
-      };
     }
   }
   Deposit.init({
