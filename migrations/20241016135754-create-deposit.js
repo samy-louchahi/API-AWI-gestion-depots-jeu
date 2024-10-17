@@ -2,14 +2,17 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Deposits', {
-      id: {
+    await queryInterface.createTable('Deposit', {
+      deposit_id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
       seller_id: {
+        type: Sequelize.INTEGER
+      },
+      session_id: {
         type: Sequelize.INTEGER
       },
       total_deposit_fee: {

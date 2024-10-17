@@ -2,8 +2,8 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Buyers', {
-      id: {
+    await queryInterface.createTable('Buyer', {
+      buyer_id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,

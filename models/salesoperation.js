@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   SalesOperation.init({
-    sale_id: {
+    sales_op_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement},

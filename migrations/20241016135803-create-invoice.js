@@ -2,8 +2,8 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Invoices', {
-      id: {
+    await queryInterface.createTable('Invoice', {
+      invoice_id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
@@ -12,13 +12,10 @@ module.exports = {
       date: {
         type: Sequelize.DATE
       },
-      somme_tot: {
+      amount: {
         type: Sequelize.DECIMAL
       },
-      buyers_id: {
-        type: Sequelize.INTEGER
-      },
-      sellers_id: {
+      sale_id: {
         type: Sequelize.INTEGER
       },
       createdAt: {

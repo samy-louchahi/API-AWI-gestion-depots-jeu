@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Stock.belongsTo(models.Session, {foreignKey: 'session_id'});
       Stock.belongsTo(models.Seller, {foreignKey: 'seller_id'});
-      Stock.hasMany(models.Games, {foreignKey: 'stock_id'});
+      Stock.hasMany(models.Game, {foreignKey: 'stock_id'});
     }
   }
   Stock.init({
@@ -21,8 +21,8 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement},
     quant_tot: DataTypes.INTEGER,
-    quant_vendues: DataTypes.INTEGER,
-    quant_dispo: DataTypes.INTEGER,
+    quant_selled: DataTypes.INTEGER,
+    quant_available: DataTypes.INTEGER,
     session_id: DataTypes.INTEGER,
     seller_id: DataTypes.INTEGER
   }, {
