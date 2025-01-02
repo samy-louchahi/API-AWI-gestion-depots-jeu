@@ -19,8 +19,8 @@ module.exports = (sequelize, DataTypes) => {
   Sale.init({
     sale_id: {
       type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement},
+      primaryKey: true
+     },
     game_id: DataTypes.INTEGER,
     sale_price: DataTypes.DECIMAL,
     sale_date: DataTypes.DATE,

@@ -10,16 +10,16 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-        Deposit.belongsTo(models.Sellers, { foreignKey: 'seller_id' });
+        Deposit.belongsTo(models.Seller, { foreignKey: 'seller_id' });
         Deposit.belongsTo(models.Session, { foreignKey: 'session_id' });
-        Deposit.hasMany(models.Games, { foreignKey: 'deposit_id' });
+        Deposit.hasMany(models.Game, { foreignKey: 'deposit_id' });
     }
   }
   Deposit.init({
     deposit_id: {
       type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true
+      primaryKey: true
+     
     },
     deposit_date: DataTypes.DATE,
     seller_id: DataTypes.INTEGER,

@@ -12,15 +12,14 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
         Seller.hasMany(models.Game, { foreignKey: 'seller_id' });
         Seller.hasMany(models.FinancialStatement, { foreignKey: 'seller_id' });
-        Seller.hasMany(models.Deposits, { foreignKey: 'seller_id' });
-        Seller.hasMany(models.Sales, { foreignKey: 'seller_id' });
+        Seller.hasMany(models.Deposit, { foreignKey: 'seller_id' });
+        Seller.hasMany(models.Sale, { foreignKey: 'seller_id' });
     }
   }
   Seller.init({
     seller_id: {
       type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement},
+      primaryKey: true},
     name: DataTypes.STRING,
     email: DataTypes.STRING,
     phone: DataTypes.STRING
@@ -28,5 +27,5 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'Seller',
   });
-  return Sellers;
+  return Seller;
 };
