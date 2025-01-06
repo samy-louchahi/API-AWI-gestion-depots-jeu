@@ -21,8 +21,8 @@ module.exports = (sequelize, DataTypes) => {
   Game.init({
     game_id: {
       type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement},
+      primaryKey: true
+      },
     name: DataTypes.STRING,
     publisher: DataTypes.STRING,
     price: DataTypes.DECIMAL,

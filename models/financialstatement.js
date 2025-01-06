@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-        FinancialStatement.belongsTo(models.Sellers, { foreignKey: 'seller_id' });
+        FinancialStatement.belongsTo(models.Seller, { foreignKey: 'seller_id' });
         FinancialStatement.belongsTo(models.Session, { foreignKey: 'session_id' });
     }
   }
@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     statement_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement},
+      },
     tot_deposit_fees: DataTypes.DECIMAL,
     tot_commission: DataTypes.DECIMAL,
     tot_sales: DataTypes.DECIMAL,

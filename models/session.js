@@ -13,15 +13,15 @@ module.exports = (sequelize, DataTypes) => {
       Session.hasMany(models.Stock, {foreignKey: 'session_id'});
       Session.hasMany(models.Deposit, {foreignKey: 'session_id'});
       Session.hasMany(models.FinancialStatement, {foreignKey: 'session_id'});
-      Session.hasMany(models.Sales, {foreignKey: 'session_id'});
+      Session.hasMany(models.Sale, {foreignKey: 'session_id'});
 
     }
   }
   Session.init({
     session_id: {
       type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement},
+      autoIncrement: true,
+      primaryKey: true},
     name: DataTypes.STRING,
     start_date: DataTypes.DATE,
     end_date: DataTypes.DATE,
