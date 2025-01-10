@@ -6,6 +6,10 @@ const { Seller } = require('../models');
 module.exports = {
     async create(req, res) {
         try {
+            const existingSeller = await Seller.findByPk(req.body.seller_id);
+            if (existingSeller) {
+                return res.status(400).json({ error: 'Seller ID already exists' });
+            }
             const seller = await Seller.create(req.body);
             res.status(201).json(seller);
         } catch (error) {
@@ -64,5 +68,30 @@ module.exports = {
         } catch (error) {
             res.status(400).json({ error: error.message });
         }
-    }
+    },
+    async bulkCreate(req, res) {
+        try {
+            const existingSellers = await Seller.findAll({
+             where: {
+                    seller_id: req.body.map(seller => seller.seller_id)
+                }
+            });
+
+            const existingSellerIds = existingSellers.map(seller => seller.seller_id);
+            const newSellers = req.body.filter(seller => !existingSellerIds.includes(seller.seller_id));
+
+            if (newSellers.length !== req.body.length) {
+                return res.status(400).json({ error: 'Some seller IDs already exist' });
+            }
+
+            const sellers = await Seller.bulkCreate(newSellers);
+            res.status(201).json(sellers);
+        } catch (error) {
+            if (error.name === 'SequelizeValidationError') {
+                res.status(400).json({ error: error.errors.map(e => e.message) });
+            } else {
+                res.status(400).json({ error: error.message });
+            }
+        }
+}
 };
