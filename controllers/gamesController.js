@@ -1,4 +1,6 @@
 const { Game } = require('../models');
+const { Seller } = require('../models');
+const { Stock } = require('../models');
 
 'use strict';
 
@@ -26,11 +28,28 @@ module.exports = {
             res.status(500).json({ error: error.message });
         }
     },
-
     async createGame(req, res) {
         try {
-            const { name, publisher, price, seller_id, stock_id, deposit_id } = req.body;
-            const newGame = await Game.create({ name, publisher, price, seller_id, stock_id, deposit_id });
+            const { game_id, name, publisher, price, seller_id, stock_id, deposit_id } = req.body;
+
+            // Check if seller exists
+            const seller = await Seller.findByPk(seller_id);
+            if (!seller) {
+                return res.status(400).json({ error: 'Seller does not exist' });
+            }
+
+            // Check if stock exists, if not create one
+            let stock = await Stock.findByPk(stock_id);
+            if (!stock) {
+                stock = await Stock.create({ stock_id, quant_tot: 0, quant_selled: 0, quant_available: 0, session_id: null, seller_id });
+            }
+
+            const existingGame = await Game.findOne({ where: { name, publisher } });
+            if (existingGame) {
+                return res.status(400).json({ error: 'Game already exists' });
+            }
+
+            const newGame = await Game.create({ game_id, name, publisher, price, seller_id, stock_id: stock.stock_id, deposit_id });
             res.status(201).json(newGame);
         } catch (error) {
             res.status(500).json({ error: error.message });

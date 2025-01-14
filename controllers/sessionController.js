@@ -6,6 +6,10 @@ const { Session } = require('../models');
 module.exports = {
     async create(req, res) {
         try {
+            const existingSession = await Session.findOne({ where: { session_id: req.body.session_id } });
+            if (existingSession) {
+                return res.status(400).json({ error: 'Session already exists' });
+            }
             const session = await Session.create(req.body);
             res.status(201).json(session);
         } catch (error) {

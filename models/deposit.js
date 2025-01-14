@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
         Deposit.belongsTo(models.Seller, { foreignKey: 'seller_id' });
         Deposit.belongsTo(models.Session, { foreignKey: 'session_id' });
-        Deposit.hasMany(models.Game, { foreignKey: 'deposit_id' });
+        Deposit.belongsTo(models.Game, { foreignKey: 'game_id' });
     }
   }
   Deposit.init({
@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
     deposit_date: DataTypes.DATE,
     seller_id: DataTypes.INTEGER,
     session_id: DataTypes.INTEGER,
-    total_deposit_fee: DataTypes.DECIMAL
+    game_id: DataTypes.INTEGER,
   }, {
     sequelize,
     modelName: 'Deposit',

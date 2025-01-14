@@ -6,8 +6,28 @@ const { Buyer } = require('../models');
 module.exports = {
     async create(req, res) {
         try {
+            const existingBuyer = await Buyer.findOne({ where: { email: req.body.email } });
+            if (existingBuyer) {
+                return res.status(400).json({ error: 'Buyer already exists' });
+            }
             const buyer = await Buyer.create(req.body);
             return res.status(201).json(buyer);
+        } catch (error) {
+            return res.status(400).json({ error: error.message });
+        }
+    },
+    async createMany(req, res) {
+        try {
+            const buyers = req.body.buyers;
+            const emails = buyers.map(buyer => buyer.email);
+            const existingBuyers = await Buyer.findAll({ where: { email: emails } });
+
+            if (existingBuyers.length > 0) {
+                return res.status(400).json({ error: 'One or more buyers already exist' });
+            }
+
+            const createdBuyers = await Buyer.bulkCreate(buyers);
+            return res.status(201).json(createdBuyers);
         } catch (error) {
             return res.status(400).json({ error: error.message });
         }

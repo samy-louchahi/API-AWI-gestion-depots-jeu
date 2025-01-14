@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
         Game.belongsTo(models.Seller, { foreignKey: 'seller_id' }); // a game belongs to a seller
         Game.belongsTo(models.Stock, { foreignKey: 'stock_id' }); // a game belongs to a stock
-        Game.belongsTo(models.Deposit, { foreignKey: 'deposit_id' }); // a game belongs to a deposit
+        Game.hasOne(models.Deposit, { foreignKey: 'game_id' }); // a game belongs to a deposit
         Game.hasOne(models.Sale, { foreignKey: 'game_id', allowNull: true }); // a game can have one sale or no sale
         Game.hasOne(models.SalesOperation, { foreignKey: 'game_id', allowNull: true }); // a game can have one sales operation or no sales operation
 
@@ -28,7 +28,6 @@ module.exports = (sequelize, DataTypes) => {
     price: DataTypes.DECIMAL,
     seller_id: DataTypes.INTEGER,
     stock_id: DataTypes.INTEGER,
-    deposit_id: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Game',
