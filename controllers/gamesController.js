@@ -1,40 +1,27 @@
-// gameController.js
+// controllers/gameController.js
 
-const { Game, Stock, Sale, SalesOperation, DepositGame } = require('../models');
+const { Game, DepositGame } = require('../models');
 
 module.exports = {
   /**
    * CREATE: POST /api/games
-   * Body attendu: { name, publisher, stock_id? }
+   * Body attendu: { name, publisher }
    */
   async createGame(req, res) {
     try {
-      const { name, publisher, stock_id } = req.body;
+      const { name, publisher } = req.body;
 
       // Vérification des champs obligatoires
       if (!name || !publisher) {
         return res.status(400).json({ error: 'Missing required fields: name, publisher' });
       }
 
-      // Optionnel : vérifier que le stock existe si un stock_id est fourni
-      let stock = null;
-      if (stock_id) {
-        stock = await Stock.findByPk(stock_id);
-        if (!stock) {
-          return res.status(404).json({ error: 'Stock not found' });
-        }
-      }
-
       // Création du jeu
-      const newGame = await Game.create({
-        name,
-        publisher,
-        stock_id: stock ? stock.stock_id : null
-      });
+      const newGame = await Game.create({ name, publisher });
 
       return res.status(201).json(newGame);
     } catch (error) {
-      console.error(error);
+      console.error('Erreur lors de la création du jeu:', error);
       return res.status(500).json({ error: error.message });
     }
   },
@@ -45,18 +32,15 @@ module.exports = {
    */
   async findAllGames(req, res) {
     try {
-      // On peut inclure Stock, Sale, SalesOperation, etc.
       const games = await Game.findAll({
         include: [
-          { model: Stock },         // si tu veux récupérer les infos de stock
-          { model: DepositGame },   // liste des dépôts
-          { model: Sale },          // s'il y a une vente
-          { model: SalesOperation } // s'il y a une opération de vente
+          { model: DepositGame }, // Inclure les associations avec DepositGame
+          // Ajoute d'autres inclusions si nécessaire
         ]
       });
       return res.json(games);
     } catch (error) {
-      console.error(error);
+      console.error('Erreur lors de la récupération des jeux:', error);
       return res.status(500).json({ error: error.message });
     }
   },
@@ -69,10 +53,8 @@ module.exports = {
       const { id } = req.params;
       const game = await Game.findByPk(id, {
         include: [
-          { model: Stock },
-          { model: DepositGame },
-          { model: Sale },
-          { model: SalesOperation }
+          { model: DepositGame, as: 'depositGames' }, // Inclure les associations avec DepositGame
+          // Ajoute d'autres inclusions si nécessaire
         ]
       });
       if (!game) {
@@ -80,33 +62,24 @@ module.exports = {
       }
       return res.json(game);
     } catch (error) {
-      console.error(error);
+      console.error('Erreur lors de la récupération du jeu:', error);
       return res.status(500).json({ error: error.message });
     }
   },
 
   /**
    * UPDATE: PUT /api/games/:id
-   * Body possible: { name, publisher, stock_id? }
+   * Body possible: { name, publisher }
    */
   async updateGame(req, res) {
     try {
       const { id } = req.params;
-      const { name, publisher, stock_id } = req.body;
+      const { name, publisher } = req.body;
 
       // Récupérer le jeu
       const game = await Game.findByPk(id);
       if (!game) {
         return res.status(404).json({ error: 'Game not found' });
-      }
-
-      // Vérifier si un stock_id est fourni
-      if (stock_id !== undefined) {
-        const stock = await Stock.findByPk(stock_id);
-        if (!stock) {
-          return res.status(404).json({ error: 'Stock not found' });
-        }
-        game.stock_id = stock_id;
       }
 
       // Mettre à jour les champs s'ils sont fournis
@@ -121,7 +94,7 @@ module.exports = {
 
       return res.json(game);
     } catch (error) {
-      console.error(error);
+      console.error('Erreur lors de la mise à jour du jeu:', error);
       return res.status(500).json({ error: error.message });
     }
   },
@@ -137,14 +110,17 @@ module.exports = {
         return res.status(404).json({ error: 'Game not found' });
       }
 
-      // Optionnel: vérifier s'il existe des DepositGame, Sale, etc. liés
-      // On peut décider de bloquer la suppression si le jeu a déjà été déposé/vendu
-      // ou bien supprimer en cascade, selon ta logique
+      // Optionnel: vérifier s'il existe des DepositGame liés
+      // Par exemple, empêcher la suppression si des associations existent
+      const associatedDepositGames = await DepositGame.findAll({ where: { game_id: id } });
+      if (associatedDepositGames.length > 0) {
+        return res.status(400).json({ error: 'Cannot delete game with associated deposit games' });
+      }
 
       await game.destroy();
       return res.json({ message: 'Game deleted successfully' });
     } catch (error) {
-      console.error(error);
+      console.error('Erreur lors de la suppression du jeu:', error);
       return res.status(500).json({ error: error.message });
     }
   }
