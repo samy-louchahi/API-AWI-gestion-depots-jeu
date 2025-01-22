@@ -3,10 +3,10 @@ const invoiceController = require('../controllers/invoiceController');
 
 const router = express.Router();
 
-router.post('/invoices', invoiceController.create);
-router.get('/invoices', invoiceController.findAll);
-router.get('/invoices/:id', invoiceController.findOne);
-router.put('/invoices/:id', invoiceController.update);
-router.delete('/invoices/:id', invoiceController.delete);
+router.post('/', invoiceController.create);
+router.get('/', invoiceController.findAll);
+router.get('/:id', invoiceController.findOne);
+router.put('/:id', invoiceController.update);
+router.delete('/:id', invoiceController.delete);
 
 module.exports = router;

@@ -22,10 +22,20 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true},
-    name: DataTypes.STRING,
-    start_date: DataTypes.DATE,
-    end_date: DataTypes.DATE,
-    status: DataTypes.BOOLEAN
+    name: { type: DataTypes.STRING,
+      allowNull: false},
+    start_date: {type: DataTypes.DATE,
+      allowNull: false},
+    end_date: {type: DataTypes.DATE,
+      allowNull: false},
+    status: {type: DataTypes.BOOLEAN,
+      allowNull: false},
+    fees: {type: DataTypes.DECIMAL(5, 2),
+      allowNull: false,
+      validate: {
+        min: 0
+      }
+    }
   }, {
     sequelize,
     modelName: 'Session',

@@ -12,19 +12,36 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
         Deposit.belongsTo(models.Seller, { foreignKey: 'seller_id' });
         Deposit.belongsTo(models.Session, { foreignKey: 'session_id' });
-        Deposit.belongsTo(models.Game, { foreignKey: 'game_id' });
+        Deposit.hasMany(models.DepositGame, { foreignKey: 'deposit_id' });
     }
   }
   Deposit.init({
     deposit_id: {
       type: DataTypes.INTEGER,
-      primaryKey: true
+      primaryKey: true,
+      autoIncrement: true
      
     },
-    deposit_date: DataTypes.DATE,
-    seller_id: DataTypes.INTEGER,
-    session_id: DataTypes.INTEGER,
-    game_id: DataTypes.INTEGER,
+    deposit_date: {
+      type: DataTypes.DATE,
+      allowNull: false
+    },
+    seller_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    session_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    discount_fees: {
+      type: DataTypes.DECIMAL(5, 2),
+      allowNull: true,
+      validate: {
+      min: 0,
+      max: 100
+      }
+    },
   }, {
     sequelize,
     modelName: 'Deposit',

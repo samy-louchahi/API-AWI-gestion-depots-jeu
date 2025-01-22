@@ -1,12 +1,11 @@
 const express = require('express');
+const router = express.Router();
 const depositController = require('../controllers/depositController');
 
-const router = express.Router();
-
-router.post('/deposits', depositController.create);
-router.get('/deposits', depositController.findAll);
-router.get('/deposits/:id', depositController.findOne);
-router.put('/deposits/:id', depositController.update);
-router.delete('/deposits/:id', depositController.delete);
+router.post('/', depositController.create);
+router.get('/', depositController.findAll);
+router.get('/:id', depositController.findOne);
+router.put('/:id', depositController.update);
+router.delete('/:id', depositController.delete);
 
 module.exports = router;

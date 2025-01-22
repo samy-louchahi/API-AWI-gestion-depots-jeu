@@ -3,10 +3,10 @@ const buyerController = require('../controllers/buyerController');
 
 const router = express.Router();
 
-router.post('/buyers', buyerController.create);
-router.get('/buyers', buyerController.findAll);
-router.get('/buyers/:id', buyerController.findOne);
-router.put('/buyers/:id', buyerController.update);
-router.delete('/buyers/:id', buyerController.delete);
+router.post('/', buyerController.create);
+router.get('/', buyerController.findAll);
+router.get('/:id', buyerController.findOne);
+router.put('/:id', buyerController.update);
+router.delete('/:id', buyerController.delete);
 
 module.exports = router;

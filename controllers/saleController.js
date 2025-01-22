@@ -1,68 +1,144 @@
-const { Sale } = require('../models');
+// saleController.js
 
-'use strict';
-
+const { Sale, Buyer, Session } = require('../models');
 
 module.exports = {
-    async createSale(req, res) {
-        try {
-            const sale = await Sale.create(req.body);
-            res.status(201).json(sale);
-        } catch (error) {
-            res.status(400).json({ error: error.message });
-        }
-    },
+  /**
+   * CREATE : POST /api/sales
+   * body = { buyer_id?, session_id, sale_date? } 
+   */
+  async createSale(req, res) {
+    try {
+      const { buyer_id, session_id, sale_date } = req.body;
 
-    async getSales(req, res) {
-        try {
-            const sales = await Sale.findAll();
-            res.status(200).json(sales);
-        } catch (error) {
-            res.status(400).json({ error: error.message });
-        }
-    },
+      // Vérifier la session
+      const session = await Session.findByPk(session_id);
+      if (!session) {
+        return res.status(404).json({ error: 'Session not found' });
+      }
 
-    async getSaleById(req, res) {
-        try {
-            const sale = await Sale.findByPk(req.params.id);
-            if (sale) {
-                res.status(200).json(sale);
-            } else {
-                res.status(404).json({ error: 'Sale not found' });
-            }
-        } catch (error) {
-            res.status(400).json({ error: error.message });
+      // Vérifier le buyer si fourni
+      if (buyer_id) {
+        const buyer = await Buyer.findByPk(buyer_id);
+        if (!buyer) {
+          return res.status(404).json({ error: 'Buyer not found' });
         }
-    },
+      }
 
-    async updateSale(req, res) {
-        try {
-            const [updated] = await Sale.update(req.body, {
-                where: { sale_id: req.params.id }
-            });
-            if (updated) {
-                const updatedSale = await Sale.findByPk(req.params.id);
-                res.status(200).json(updatedSale);
-            } else {
-                res.status(404).json({ error: 'Sale not found' });
-            }
-        } catch (error) {
-            res.status(400).json({ error: error.message });
-        }
-    },
+      // Créer la vente
+      const newSale = await Sale.create({
+        buyer_id: buyer_id || null,
+        session_id,
+        sale_date: sale_date || new Date()
+      });
 
-    async deleteSale(req, res) {
-        try {
-            const deleted = await Sale.destroy({
-                where: { sale_id: req.params.id }
-            });
-            if (deleted) {
-                res.status(204).json();
-            } else {
-                res.status(404).json({ error: 'Sale not found' });
-            }
-        } catch (error) {
-            res.status(400).json({ error: error.message });
-        }
+      return res.status(201).json(newSale);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: error.message });
     }
+  },
+
+  /**
+   * READ ALL : GET /api/sales
+   */
+  async findAllSales(req, res) {
+    try {
+      // Inclure Buyer, Session
+      const sales = await Sale.findAll({
+        include: [
+            Buyer,
+            Session,
+            { model: SaleDetail, include: [DepositGame] }
+          ]
+      });
+      return res.json(sales);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: error.message });
+    }
+  },
+
+  /**
+   * READ ONE : GET /api/sales/:id
+   */
+  async findSaleById(req, res) {
+    try {
+      const { id } = req.params;
+      const sale = await Sale.findByPk(id, {
+        include: [Buyer, Session]
+      });
+      if (!sale) {
+        return res.status(404).json({ error: 'Sale not found' });
+      }
+      return res.json(sale);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: error.message });
+    }
+  },
+
+  /**
+   * UPDATE : PUT /api/sales/:id
+   */
+  async updateSale(req, res) {
+    try {
+      const { id } = req.params;
+      const { buyer_id, session_id, sale_date } = req.body;
+
+      const sale = await Sale.findByPk(id);
+      if (!sale) {
+        return res.status(404).json({ error: 'Sale not found' });
+      }
+
+      // Vérif Buyer
+      if (buyer_id) {
+        // check buyer
+        // ...
+        sale.buyer_id = buyer_id;
+      }
+
+      // Vérif Session
+      if (session_id) {
+        // check session
+        // ...
+        sale.session_id = session_id;
+      }
+
+      if (sale_date) {
+        sale.sale_date = sale_date;
+      }
+
+      await sale.save();
+
+      return res.json(sale);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: error.message });
+    }
+  },
+
+  /**
+   * DELETE : DELETE /api/sales/:id
+   * (Optionnel : supprimer les SaleDetail associés ? 
+   *  ou bien on laisse le code métier décider)
+   */
+  async deleteSale(req, res) {
+    try {
+      const { id } = req.params;
+      const sale = await Sale.findByPk(id);
+      if (!sale) {
+        return res.status(404).json({ error: 'Sale not found' });
+      }
+
+      // Optionnel : supprimer les SaleDetail avant
+      // await SaleDetail.destroy({ where: { sale_id: id } });
+
+      await sale.destroy();
+      return res.json({ message: 'Sale deleted successfully' });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: error.message });
+    }
+  }
 };

@@ -1,13 +1,12 @@
+// saleOperationRoutes.js
 const express = require('express');
-const salesOperationController = require('../controllers/salesOperationController');
-
-
 const router = express.Router();
+const saleOperationController = require('../controllers/saleOperationController');
 
-router.post('/sales-operations', salesOperationController.create);
-router.get('/sales-operations', salesOperationController.findAll);
-router.get('/sales-operations/:id', salesOperationController.findOne);
-router.put('/sales-operations/:id', salesOperationController.update);
-router.delete('/sales-operations/:id', salesOperationController.delete);
+router.post('/', saleOperationController.createSaleOperation);
+router.get('/', saleOperationController.findAllSaleOperations);
+router.get('/:id', saleOperationController.findSaleOperationById);
+router.put('/:id', saleOperationController.updateSaleOperation);
+router.delete('/:id', saleOperationController.deleteSaleOperation);
 
 module.exports = router;

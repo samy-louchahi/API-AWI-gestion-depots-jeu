@@ -1,65 +1,126 @@
-const { SalesOperation } = require('../models');
+// saleOperationController.js
 
-'use strict';
-
+const { SalesOperation, Sale } = require('../models');
 
 module.exports = {
-    async create(req, res) {
-        try {
-            const salesOperation = await SalesOperation.create(req.body);
-            res.status(201).json(salesOperation);
-        } catch (error) {
-            res.status(400).json({ error: error.message });
-        }
-    },
+  /**
+   * CREATE : POST /api/sale-operations
+   * body = { sale_id, commission, sale_status, sale_date }
+   */
+  async createSaleOperation(req, res) {
+    try {
+      const { sale_id, commission, sale_status, sale_date } = req.body;
 
-    async findAll(req, res) {
-        try {
-            const salesOperations = await SalesOperation.findAll();
-            res.status(200).json(salesOperations);
-        } catch (error) {
-            res.status(400).json({ error: error.message });
-        }
-    },
+      // Vérifier que la vente existe
+      const sale = await Sale.findByPk(sale_id);
+      if (!sale) {
+        return res.status(404).json({ error: 'Sale not found' });
+      }
 
-    async findOne(req, res) {
-        try {
-            const salesOperation = await SalesOperation.findByPk(req.params.id);
-            if (!salesOperation) {
-                return res.status(404).json({ error: 'SalesOperation not found' });
-            }
-            res.status(200).json(salesOperation);
-        } catch (error) {
-            res.status(400).json({ error: error.message });
-        }
-    },
+      // Créer la saleOperation
+      const newOp = await SalesOperation.create({
+        sale_id,
+        commission,
+        sale_status: sale_status || 'en cours',
+        sale_date: sale_date || new Date()
+      });
 
-    async update(req, res) {
-        try {
-            const [updated] = await SalesOperation.update(req.body, {
-                where: { sales_op_id: req.params.id }
-            });
-            if (!updated) {
-                return res.status(404).json({ error: 'SalesOperation not found' });
-            }
-            const updatedSalesOperation = await SalesOperation.findByPk(req.params.id);
-            res.status(200).json(updatedSalesOperation);
-        } catch (error) {
-            res.status(400).json({ error: error.message });
-        }
-    },
-
-    async delete(req, res) {
-        try {
-            const deleted = await SalesOperation.destroy({
-                where: { sales_op_id: req.params.id }
-            });
-            if (!deleted) {
-                return res.status(404).json({ error: 'SalesOperation not found' });
-            }
-            res.status(204).json();
-        } catch (error) {
-            res.status(400).json({ error: error.message });
-        }
+      return res.status(201).json(newOp);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: error.message });
     }
+  },
+
+  /**
+   * READ ALL : GET /api/sale-operations
+   */
+  async findAllSaleOperations(req, res) {
+    try {
+      const ops = await SalesOperation.findAll({
+        include: [Sale]
+      });
+      return res.json(ops);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: error.message });
+    }
+  },
+
+  /**
+   * READ ONE : GET /api/sale-operations/:id
+   */
+  async findSaleOperationById(req, res) {
+    try {
+      const { id } = req.params;
+      const op = await SalesOperation.findByPk(id, {
+        include: [Sale]
+      });
+      if (!op) {
+        return res.status(404).json({ error: 'SaleOperation not found' });
+      }
+      return res.json(op);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: error.message });
+    }
+  },
+
+  /**
+   * UPDATE : PUT /api/sale-operations/:id
+   */
+  async updateSaleOperation(req, res) {
+    try {
+      const { id } = req.params;
+      const { sale_id, commission, sale_status, sale_date } = req.body;
+
+      const op = await SalesOperation.findByPk(id);
+      if (!op) {
+        return res.status(404).json({ error: 'SaleOperation not found' });
+      }
+
+      if (sale_id) {
+        const sale = await Sale.findByPk(sale_id);
+        if (!sale) {
+          return res.status(404).json({ error: 'Sale not found' });
+        }
+        op.sale_id = sale_id;
+      }
+
+      if (commission !== undefined) {
+        op.commission = commission;
+      }
+      if (sale_status) {
+        op.sale_status = sale_status;
+      }
+      if (sale_date) {
+        op.sale_date = sale_date;
+      }
+
+      await op.save();
+      return res.json(op);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: error.message });
+    }
+  },
+
+  /**
+   * DELETE : DELETE /api/sale-operations/:id
+   */
+  async deleteSaleOperation(req, res) {
+    try {
+      const { id } = req.params;
+      const op = await SalesOperation.findByPk(id);
+      if (!op) {
+        return res.status(404).json({ error: 'SaleOperation not found' });
+      }
+
+      await op.destroy();
+      return res.json({ message: 'SaleOperation deleted successfully' });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: error.message });
+    }
+  }
 };

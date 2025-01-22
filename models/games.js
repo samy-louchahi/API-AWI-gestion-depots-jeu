@@ -10,9 +10,8 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-        Game.belongsTo(models.Seller, { foreignKey: 'seller_id' }); // a game belongs to a seller
         Game.belongsTo(models.Stock, { foreignKey: 'stock_id' }); // a game belongs to a stock
-        Game.hasOne(models.Deposit, { foreignKey: 'game_id' }); // a game belongs to a deposit
+        Game.hasMany(models.DepositGame, { foreignKey: 'game_id' }); // a game can have many deposit games
         Game.hasOne(models.Sale, { foreignKey: 'game_id', allowNull: true }); // a game can have one sale or no sale
         Game.hasOne(models.SalesOperation, { foreignKey: 'game_id', allowNull: true }); // a game can have one sales operation or no sales operation
 
@@ -21,13 +20,17 @@ module.exports = (sequelize, DataTypes) => {
   Game.init({
     game_id: {
       type: DataTypes.INTEGER,
-      primaryKey: true
+      primaryKey: true,
+      autoIncrement: true
       },
-    name: DataTypes.STRING,
-    publisher: DataTypes.STRING,
-    price: DataTypes.DECIMAL,
-    seller_id: DataTypes.INTEGER,
-    stock_id: DataTypes.INTEGER,
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    publisher: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
   }, {
     sequelize,
     modelName: 'Game',

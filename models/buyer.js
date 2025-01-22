@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     buyer_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
+      autoIncrement: true
     },
     name: {
       type: DataTypes.STRING,

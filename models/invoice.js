@@ -16,7 +16,8 @@ module.exports = (sequelize, DataTypes) => {
   Invoice.init({
     invoice_id: {
       type: DataTypes.INTEGER,
-      primaryKey: true
+      primaryKey: true,
+      autoIncrement: true
      },
     date: DataTypes.DATE,
     amount: DataTypes.DECIMAL,

@@ -19,7 +19,9 @@ module.exports = (sequelize, DataTypes) => {
   Seller.init({
     seller_id: {
       type: DataTypes.INTEGER,
-      primaryKey: true},
+      primaryKey: true,
+      autoIncrement: true
+    },
     name: DataTypes.STRING,
     email: DataTypes.STRING,
     phone: DataTypes.STRING

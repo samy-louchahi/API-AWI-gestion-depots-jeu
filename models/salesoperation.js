@@ -10,17 +10,33 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      SalesOperation.belongsTo(models.Game, { foreignKey: 'game_id' });
+      SalesOperation.belongsTo(models.Sale, { foreignKey: 'sale_id' });
     }
   }
   SalesOperation.init({
     sales_op_id: {
       type: DataTypes.INTEGER,
-      primaryKey: true},
-    game_id: DataTypes.INTEGER,
-    sale_date: DataTypes.DATE,
-    label_generated: DataTypes.BOOLEAN,
-    sale_status: DataTypes.STRING
+      primaryKey: true,
+      autoIncrement: true
+    },
+    sale_id:{
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    commission: {
+      type: DataTypes.DECIMAL(5, 2),
+      allowNull: false,
+      validate: {
+      min: 0,
+      max: 100
+      }
+    },
+    sale_date:{
+      type:  DataTypes.DATE,
+      allowNull: false
+    },
+    sale_status: {type: DataTypes.ENUM('en cours', 'finalisé', 'annulé'),
+      allowNull: false},
   }, {
     sequelize,
     modelName: 'SalesOperation',
