@@ -1,6 +1,6 @@
 // depositGameController.js
 
-const { DepositGame, Deposit, Game, Stock } = require('../models'); 
+const { DepositGame, Deposit, Game, Stock , Session} = require('../models'); 
 
 // CREATE
 exports.createDepositGame = async (req, res) => {
@@ -14,12 +14,16 @@ exports.createDepositGame = async (req, res) => {
       // vérifier que le Game existe
       const game = await Game.findByPk(game_id);
       if (!game) return res.status(404).json({ error: 'Game not found' });
-  
+
+      const session = await Session.findByPk(deposit.session_id);
+
+      const depositGameFees = session.fees;
+        
       // Création de la ligne DepositGame
       const newDepositGame = await DepositGame.create({
         deposit_id,
         game_id,
-        fees,
+        fees : depositGameFees,
         price
         // label est auto-généré via un hook "beforeCreate"
       });

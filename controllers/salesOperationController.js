@@ -1,6 +1,6 @@
 // saleOperationController.js
 
-const { SalesOperation, Sale } = require('../models');
+const { SalesOperation, Sale, Session } = require('../models');
 
 module.exports = {
   /**
@@ -16,11 +16,14 @@ module.exports = {
       if (!sale) {
         return res.status(404).json({ error: 'Sale not found' });
       }
+      const session = await Session.findByPk(sale.session_id);
+
+      const commissionRate = session.commission_rate;
 
       // Créer la saleOperation
       const newOp = await SalesOperation.create({
         sale_id,
-        commission,
+        commission : commissionRate,
         sale_status: sale_status || 'en cours',
         sale_date: sale_date || new Date()
       });

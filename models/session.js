@@ -33,9 +33,18 @@ module.exports = (sequelize, DataTypes) => {
     fees: {type: DataTypes.DECIMAL(5, 2),
       allowNull: false,
       validate: {
-        min: 0
+        min: 0,
+        max: 100
       }
-    }
+    },
+    commission: {
+      type: DataTypes.DECIMAL(5, 2),
+      allowNull: false,
+      validate: {
+      min: 0,
+      max: 100
+      }
+    },
   }, {
     sequelize,
     modelName: 'Session',
