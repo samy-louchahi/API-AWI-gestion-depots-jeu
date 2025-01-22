@@ -1,7 +1,7 @@
 // saleOperationRoutes.js
 const express = require('express');
 const router = express.Router();
-const saleOperationController = require('../controllers/saleOperationController');
+const saleOperationController = require('../controllers/salesOperationController');
 
 router.post('/', saleOperationController.createSaleOperation);
 router.get('/', saleOperationController.findAllSaleOperations);

@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Sale.hasMany(models.SaleDetail, { foreignKey: 'sale_id' });
       
-      Sale.hasOne(models.SaleOperation, { foreignKey: 'sale_id' });
+      Sale.hasOne(models.SalesOperation, { foreignKey: 'sale_id' });
       
       Sale.belongsTo(models.Buyer, { foreignKey: 'buyer_id' });
       

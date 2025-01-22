@@ -12,7 +12,6 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Session.hasMany(models.Stock, {foreignKey: 'session_id'});
       Session.hasMany(models.Deposit, {foreignKey: 'session_id'});
-      Session.hasMany(models.FinancialStatement, {foreignKey: 'session_id'});
       Session.hasMany(models.Sale, {foreignKey: 'session_id'});
 
     }

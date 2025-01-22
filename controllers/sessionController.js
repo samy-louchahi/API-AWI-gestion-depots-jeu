@@ -6,18 +6,27 @@ const { Session } = require('../models');
 module.exports = {
     async create(req, res) {
         try {
-            const existingSession = await Session.findOne({ where: { session_id: req.body.session_id } });
+            const { name, start_date, end_date, status, fees, commission } = req.body;
+            const existingSession = await Session.findOne({ where: { name: name } });
             if (existingSession) {
                 return res.status(400).json({ error: 'Session already exists' });
             }
-            const session = await Session.create(req.body);
+            const session = await Session.create({
+                name,
+                start_date,
+                end_date,
+                status,
+                fees,
+                commission
+
+            });
             res.status(201).json(session);
         } catch (error) {
             res.status(400).json({ error: error.message });
         }
     },
 
-    async findAll(req, res) {
+    async findAll(_req, res) {
         try {
             const sessions = await Session.findAll();
             res.status(200).json(sessions);

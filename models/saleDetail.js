@@ -6,8 +6,8 @@ module.exports = (sequelize, DataTypes) => {
   class SaleDetail extends Model {
     static associate(models) {
       SaleDetail.belongsTo(models.Sale, { foreignKey: 'sale_id' });
-      // On référence DepositGame plutôt que Game directement
       SaleDetail.belongsTo(models.DepositGame, { foreignKey: 'deposit_game_id' });
+      SaleDetail.belongsTo(models.Seller, { foreignKey: 'seller_id' });
     }
   }
 
@@ -18,6 +18,10 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true
     },
     sale_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    seller_id: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
