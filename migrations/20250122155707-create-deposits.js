@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Deposits', {
+    await queryInterface.createTable('deposits', {
       deposit_id: {
         allowNull: false,
         autoIncrement: true,
@@ -16,7 +16,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'Sellers',
+          model: 'sellers',
           key: 'seller_id'
         },
         onUpdate: 'CASCADE',
@@ -26,7 +26,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'Sessions',
+          model: 'sessions',
           key: 'session_id'
         },
         onUpdate: 'CASCADE',
@@ -50,6 +50,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Deposits');
+    await queryInterface.dropTable('deposits');
   }
 };

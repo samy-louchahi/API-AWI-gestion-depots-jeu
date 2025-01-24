@@ -6,23 +6,36 @@ const { Session } = require('../models');
 module.exports = {
     async create(req, res) {
         try {
-            const { name, start_date, end_date, status, fees, commission } = req.body;
-            const existingSession = await Session.findOne({ where: { name: name } });
-            if (existingSession) {
-                return res.status(400).json({ error: 'Session already exists' });
+            const { name, start_date, end_date, fees, commission } = req.body;
+    
+            // Validation des champs requis
+            if (!name || !start_date || !end_date) {
+                return res.status(400).json({ error: 'Le nom, la date de début et la date de fin sont requis.' });
             }
-            const session = await Session.create({
+    
+            const currentDate = new Date();
+            const startDate = new Date(start_date);
+            const endDate = new Date(end_date);
+    
+            // Déterminer le statut basé sur les dates
+            let status = false;
+            if (currentDate >= startDate && currentDate <= endDate) {
+                status = true;
+            }
+    
+            const newSession = await Session.create({
                 name,
                 start_date,
                 end_date,
-                status,
                 fees,
-                commission
-
+                commission,
+                status
             });
-            res.status(201).json(session);
+    
+            res.status(201).json(newSession);
         } catch (error) {
-            res.status(400).json({ error: error.message });
+            console.error('Erreur lors de la création de la session:', error);
+            res.status(500).json({ error: 'Échec de la création de la session.' });
         }
     },
 
@@ -50,17 +63,47 @@ module.exports = {
 
     async update(req, res) {
         try {
-            const [updated] = await Session.update(req.body, {
-                where: { session_id: req.params.id }
-            });
-            if (updated) {
-                const updatedSession = await Session.findByPk(req.params.id);
-                res.status(200).json(updatedSession);
-            } else {
-                res.status(404).json({ error: 'Session not found' });
+            const { id } = req.params;
+            const { name, start_date, end_date, fees, commission } = req.body;
+    
+            // Validation des champs requis
+            if (!name || !start_date || !end_date) {
+                return res.status(400).json({ error: 'Le nom, la date de début et la date de fin sont requis.' });
             }
+    
+            const currentDate = new Date();
+            const startDate = new Date(start_date);
+            const endDate = new Date(end_date);
+    
+            // Déterminer le statut basé sur les dates
+            let status = false;
+            if (currentDate >= startDate && currentDate <= endDate) {
+                status = true;
+            }
+    
+            const [updatedRows, [updatedSession]] = await Session.update(
+                {
+                    name,
+                    start_date,
+                    end_date,
+                    fees,
+                    commission,
+                    status
+                },
+                {
+                    where: { session_id: id },
+                    returning: true
+                }
+            );
+    
+            if (updatedRows === 0) {
+                return res.status(404).json({ error: 'Session non trouvée.' });
+            }
+    
+            res.status(200).json(updatedSession);
         } catch (error) {
-            res.status(400).json({ error: error.message });
+            console.error('Erreur lors de la mise à jour de la session:', error);
+            res.status(500).json({ error: 'Échec de la mise à jour de la session.' });
         }
     },
 

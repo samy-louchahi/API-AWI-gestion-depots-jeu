@@ -29,6 +29,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false 
     },
+    sale_status: {
+      type: DataTypes.ENUM('en cours', 'finalisé', 'annulé'),
+      allowNull: false,
+      defaultValue: 'en cours'
+    },
     sale_date: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -37,6 +42,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Sale',
+    tableName: 'sales'
   });
   
   return Sale;

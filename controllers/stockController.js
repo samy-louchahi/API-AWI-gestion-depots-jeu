@@ -72,16 +72,33 @@ module.exports = {
    */
   async findAllStocks(req, res) {
     try {
-      // Optionnel : inclure les associations Session, Seller, Game
+      const { seller_id, session_id, game_id } = req.query;
+      const where = {};
+
+      if (seller_id) {
+        where.seller_id = seller_id;
+      }
+
+      if (session_id) {
+        where.session_id = session_id;
+      }
+
+      if (game_id) {
+        where.game_id = game_id;
+      }
+
       const stocks = await Stock.findAll({
+        where,
         include: [Session, Seller, Game]
       });
+
       return res.json(stocks);
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: error.message });
     }
   },
+
 
   /**
    * READ ONE : GET /api/stocks/:id

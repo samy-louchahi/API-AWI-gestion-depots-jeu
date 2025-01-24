@@ -33,10 +33,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 1
-    },
+    },  
   }, {
     sequelize,
     modelName: 'SaleDetail',
+    tableName: 'sale_details'
   });
 
   return SaleDetail;

@@ -1,6 +1,4 @@
-// saleDetailController.js
-
-const { SaleDetail, Sale, DepositGame } = require('../models');
+const { SaleDetail, Sale, DepositGame, Deposit, Seller } = require('../models');
 
 module.exports = {
   /**
@@ -17,17 +15,37 @@ module.exports = {
         return res.status(404).json({ error: 'Sale not found' });
       }
 
-      // 2. Vérifier que le DepositGame existe
-      const depositGame = await DepositGame.findByPk(deposit_game_id);
+      // 2. Vérifier que le DepositGame existe avec l'association Deposit et Seller
+      const depositGame = await DepositGame.findByPk(deposit_game_id, {
+        include: [
+          {
+            model: Deposit,
+            as: 'Deposit',
+            include: [
+              {
+                model: Seller,
+                as: 'Seller'
+              }
+            ]
+          }
+        ]
+      });
       if (!depositGame) {
         return res.status(404).json({ error: 'DepositGame not found' });
       }
 
-      // 3. Créer le SaleDetail
+      // 3. Récupérer le seller_id à partir de DepositGame -> Deposit -> Seller
+      const seller = depositGame.Deposit?.Seller;
+      if (!seller) {
+        return res.status(400).json({ error: 'Seller not found for this DepositGame' });
+      }
+
+      // 4. Créer le SaleDetail avec seller_id
       const newSaleDetail = await SaleDetail.create({
         sale_id,
         deposit_game_id,
-        quantity: quantity || 1
+        quantity: quantity || 1,
+        seller_id: seller.seller_id
       });
 
       return res.status(201).json(newSaleDetail);
@@ -42,10 +60,24 @@ module.exports = {
    */
   async findAllSaleDetails(req, res) {
     try {
-      // On peut inclure Sale et DepositGame pour plus d'infos
+      const { seller_id } = req.query;
+      const where = {};
+
+      if (seller_id) {
+        where.seller_id = seller_id;
+      }
+
       const saleDetails = await SaleDetail.findAll({
-        include: [Sale, DepositGame]
+        where,
+        include: [
+          {
+            model: Sale,
+            include: [/* Ajouter d'autres modèles si nécessaire */]
+          },
+          DepositGame
+        ]
       });
+
       return res.json(saleDetails);
     } catch (error) {
       console.error(error);

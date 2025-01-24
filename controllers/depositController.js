@@ -27,13 +27,13 @@ module.exports = {
         games // tableau d'objets { game_id, price, fees }
       } = req.body;
 
-      //Vérifier l'existence de la Session et du Seller
-    const session = await Session.findByPk(session_id);
-    if (!session) return res.status(400).json({ error: 'Session not found' });
-    const seller = await Seller.findByPk(seller_id);
-    if (!seller) return res.status(400).json({ error: 'Seller not found' });
-      
-      // 2. Créer le dépôt
+      // Vérifier l'existence de la Session et du Seller
+      const session = await Session.findByPk(session_id);
+      if (!session) return res.status(400).json({ error: 'Session not found' });
+      const seller = await Seller.findByPk(seller_id);
+      if (!seller) return res.status(400).json({ error: 'Seller not found' });
+
+      // Créer le dépôt
       const newDeposit = await Deposit.create({
         seller_id,
         session_id,
@@ -41,53 +41,73 @@ module.exports = {
         discount_fees
       });
 
-      //Créer les DepositGame s'il y a un tableau "games"
-      //Chaque DepositGame aura un label auto-généré via le hook beforeCreate (dans DepositGame)
+      // Créer les DepositGame s'il y a un tableau "games"
+      // Chaque DepositGame aura un label auto-généré via le hook beforeCreate (dans DepositGame)
       if (Array.isArray(games)) {
         for (const g of games) {
           await DepositGame.create({
             deposit_id: newDeposit.deposit_id,
             game_id: g.game_id,
             price: g.price,
-            fees: g.fees
+            fees: g.fees,
+            quantity: g.quantity || 1 // Assurez-vous d'avoir une quantité par défaut
           });
         }
       }
 
-      //Renvoyer le dépôt, éventuellement avec les DepositGame créés
-      //On peut faire un "reload" avec include pour récupérer les associations
-      const depositWithGames = await Deposit.findByPk(newDeposit.deposit_id, {
-        include: [DepositGame]
+      // Récupérer le dépôt avec les associations
+      const depositWithAssociations = await Deposit.findByPk(newDeposit.deposit_id, {
+        include: [
+          {
+            model: DepositGame,
+            as: 'DepositGames',
+            include: [
+              {
+                model: Game,
+                as: 'Game'
+              }
+            ]
+          },
+          {
+            model: Seller,
+            as: 'Seller'
+          },
+          {
+            model: Session,
+            as: 'Session'
+          }
+        ]
       });
 
-      return res.status(201).json(depositWithGames);
+      return res.status(201).json(depositWithAssociations);
     } catch (error) {
       console.error(error);
       return res.status(400).json({ error: error.message });
     }
   },
-
   /**
    * Récupérer tous les dépôts (avec ou sans leurs DepositGame)
    */
   async findAll(req, res) {
     try {
-      const deposits = await Deposit.findAll({
-        // Pour inclure toutes les DepositGame associées + la table 'Game' si besoin
-        include: [
-          {
-            model: DepositGame,
-            include: [Game]
-          },
-          // Éventuellement inclure Seller, Session...
-          // { model: Seller },
-          // { model: Session }
-        ]
-      });
-      return res.status(200).json(deposits);
+        const deposits = await Deposit.findAll({
+            include: [
+                {
+                    model: DepositGame,
+                    include: [Game]
+                },
+                {
+                    model: Seller
+                },
+                {
+                    model: Session
+                }
+            ]
+        });
+        return res.status(200).json(deposits);
     } catch (error) {
-      console.error(error);
-      return res.status(400).json({ error: error.message });
+        console.error(error);
+        return res.status(400).json({ error: error.message });
     }
   },
 
@@ -96,22 +116,28 @@ module.exports = {
    */
   async findOne(req, res) {
     try {
-      const { id } = req.params;
-      const deposit = await Deposit.findByPk(id, {
-        include: [
-          {
-            model: DepositGame,
-            include: [Game]
-          }
-        ]
-      });
-      if (!deposit) {
-        return res.status(404).json({ error: 'Deposit not found' });
-      }
-      return res.status(200).json(deposit);
+        const { id } = req.params;
+        const deposit = await Deposit.findByPk(id, {
+            include: [
+                {
+                    model: DepositGame,
+                    include: [Game]
+                },
+                {
+                    model: Seller
+                },
+                {
+                    model: Session
+                }
+            ]
+        });
+        if (!deposit) {
+            return res.status(404).json({ error: 'Deposit not found' });
+        }
+        return res.status(200).json(deposit);
     } catch (error) {
-      console.error(error);
-      return res.status(400).json({ error: error.message });
+        console.error(error);
+        return res.status(400).json({ error: error.message });
     }
   },
 

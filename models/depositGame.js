@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     label: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       unique: true
     },
     fees: {
@@ -36,10 +36,17 @@ module.exports = (sequelize, DataTypes) => {
     game_id: {
       type: DataTypes.INTEGER,
       allowNull: false
+    },
+    quantity: {
+        type: DataTypes.INTEGER,
+        allowNull:
+        false,
+        defaultValue: 0
     }
   }, {
     sequelize,
     modelName: 'DepositGame',
+    tableName: 'deposit_games'
   });
   DepositGame.addHook('beforeCreate', (depositGame) => {
     depositGame.label = uuidv4(); // Génère un label unique

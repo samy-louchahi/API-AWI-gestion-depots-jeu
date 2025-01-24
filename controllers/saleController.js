@@ -1,6 +1,6 @@
 // saleController.js
 
-const { Sale, Buyer, Session } = require('../models');
+const { Sale, Buyer, Session, SaleDetail, DepositGame } = require('../models');
 
 module.exports = {
   /**
@@ -9,7 +9,7 @@ module.exports = {
    */
   async createSale(req, res) {
     try {
-      const { buyer_id, session_id, sale_date } = req.body;
+      const { buyer_id, session_id, sale_date, sale_status } = req.body;
 
       // Vérifier la session
       const session = await Session.findByPk(session_id);
@@ -29,7 +29,8 @@ module.exports = {
       const newSale = await Sale.create({
         buyer_id: buyer_id || null,
         session_id,
-        sale_date: sale_date || new Date()
+        sale_date: sale_date || new Date(),
+        sale_status: sale_status || 'en cours'
       });
 
       return res.status(201).json(newSale);
@@ -84,7 +85,7 @@ module.exports = {
   async updateSale(req, res) {
     try {
       const { id } = req.params;
-      const { buyer_id, session_id, sale_date } = req.body;
+      const { buyer_id, session_id, sale_date, sale_status } = req.body;
 
       const sale = await Sale.findByPk(id);
       if (!sale) {
@@ -107,6 +108,9 @@ module.exports = {
 
       if (sale_date) {
         sale.sale_date = sale_date;
+      }
+      if (sale_status) {
+        sale.sale_status = sale_status;
       }
 
       await sale.save();
