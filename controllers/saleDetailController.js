@@ -52,11 +52,11 @@ module.exports = {
       // 5. Mettre à jour le stock
       if(depositGame){
         game_id = depositGame.game_id;
-        stock = await Stock.findOne({ where: { game_id } });
-        if (stock) {
-          stock.current_quantity -= quantity;
-          await stock.save();
-        }
+          stock = await Stock.findOne({ where: { game_id } });
+          if (stock) {
+            stock.current_quantity -= quantity;
+            await stock.save();
+          }
       }
       return res.status(201).json(newSaleDetail);
     } catch (error) {
