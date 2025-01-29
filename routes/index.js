@@ -11,4 +11,7 @@ module.exports =  (app) => {
     app.use('/api/sellers', require('./sellerRoutes'));
     app.use('/api/depositGames', require('./depositGameRoutes'));
     app.use('/api/finances', require('./financeRoutes'));
+    app.use('/api/auth', require('./authRoutes'));
+    app.use('/api/admins', require('./adminRoutes'));
+    app.use('/api/gestionnaires', require('./gestionnaireRoutes'));
 };

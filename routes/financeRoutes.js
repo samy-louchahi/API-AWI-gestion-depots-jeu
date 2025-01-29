@@ -1,6 +1,17 @@
-// financeRoutes.js
 const express = require('express');
+const { authenticateToken } = require('../middleware/authMiddleware');
+
 const router = express.Router();
+router.use(authenticateToken);
+
+router.use((req, res, next) => {
+    if (req.user.role === 'admin' || req.user.role === 'gestionnaire') {
+        next();
+    } else {
+        return res.status(403).json({ error: 'Accès interdit.' });
+    }
+});
+
 const financeController = require('../controllers/financeController');
 
 // Bilan global pour une session : GET /api/finance/session/:session_id
