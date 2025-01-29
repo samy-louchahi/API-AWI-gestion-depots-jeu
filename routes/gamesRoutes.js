@@ -18,5 +18,6 @@ router.get('/', gamesController.findAllGames);
 router.get('/:id', gamesController.findGameById);
 router.put('/:id', gamesController.updateGame);
 router.delete('/:id', gamesController.deleteGame);
+router.get('/:id/stocks', gamesController.getGameStocks);
 
 module.exports = router;

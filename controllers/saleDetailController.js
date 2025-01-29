@@ -1,4 +1,5 @@
-const { SaleDetail, Sale, DepositGame, Deposit, Seller } = require('../models');
+const { where } = require('sequelize');
+const { SaleDetail, Sale, DepositGame, Deposit, Seller, Stock } = require('../models');
 
 module.exports = {
   /**
@@ -48,6 +49,15 @@ module.exports = {
         seller_id: seller.seller_id
       });
 
+      // 5. Mettre à jour le stock
+      if(depositGame){
+        game_id = depositGame.game_id;
+        stock = await Stock.findOne({ where: { game_id } });
+        if (stock) {
+          stock.current_quantity -= quantity;
+          await stock.save();
+        }
+      }
       return res.status(201).json(newSaleDetail);
     } catch (error) {
       console.error(error);

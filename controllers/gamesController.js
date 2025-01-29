@@ -1,6 +1,6 @@
 // controllers/gameController.js
 
-const { Game, DepositGame } = require('../models');
+const { Game, DepositGame, Stock, Seller } = require('../models');
 
 module.exports = {
   /**
@@ -122,6 +122,30 @@ module.exports = {
     } catch (error) {
       console.error('Erreur lors de la suppression du jeu:', error);
       return res.status(500).json({ error: error.message });
+    }
+  },
+  async getGameStocks(req, res) {
+    const gameId = req.params.id;
+
+    try {
+        // Vérifier si le jeu existe
+        const game = await Game.findByPk(gameId);
+        if (!game) {
+            return res.status(404).json({ error: 'Jeu non trouvé.' });
+        }
+
+        // Récupérer tous les stocks associés à ce jeu, incluant les informations sur les vendeurs
+        const stocks = await Stock.findAll({
+          where: { game_id: gameId },
+          include: [
+            { model: Seller, attributes: ['seller_id', 'name'] }
+          ]
+        });
+
+        res.status(200).json(stocks);
+    } catch (error) {
+        console.error('Erreur dans getGameStocks:', error);
+        res.status(500).json({ error: 'Erreur serveur lors de la récupération des stocks du jeu.' });
     }
   }
 };
