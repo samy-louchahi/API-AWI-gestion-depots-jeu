@@ -1,4 +1,6 @@
 const { Deposit, DepositGame, Session, Seller, Game } = require('../models');
+const deposit_game_controller = require('./depositGameController');
+const sequelize = require('sequelize');
 // Assure-toi d'importer tous les modèles nécessaires
 
 module.exports = {
@@ -41,16 +43,27 @@ module.exports = {
         discount_fees
       });
 
+
       // Créer les DepositGame s'il y a un tableau "games"
       // Chaque DepositGame aura un label auto-généré via le hook beforeCreate (dans DepositGame)
       if (Array.isArray(games)) {
         for (const g of games) {
-          await DepositGame.create({
+          // Vérifier que le jeu existe
+          const game = await Game.findByPk(g.game_id);
+          if (!game) {
+            await newDeposit.destroy(); // Supprimer le dépôt si un jeu n'existe pas
+            return res.status(400).json({ error: `Game with ID ${g.game_id} not found` });
+          }
+          console.log('Données envoyées au DepositGameController:', {
+            deposit_id: newDeposit.deposit_id,
+            ...g
+        });
+          await deposit_game_controller.createDepositGame({
             deposit_id: newDeposit.deposit_id,
             game_id: g.game_id,
             price: g.price,
-            fees: g.fees,
-            quantity: g.quantity || 1 // Assurez-vous d'avoir une quantité par défaut
+            quantity: g.quantity || 1, // Assurez-vous d'avoir une quantité par défaut
+            fees: session.fees // Utiliser les frais de la session
           });
         }
       }

@@ -1,13 +1,12 @@
 const stockController = require('./stockController');
 const { DepositGame, Deposit, Game, Stock , Session} = require('../models'); 
+const sequelize = require('../models/index').sequelize;
 
 // CREATE
-exports.createDepositGame = async (req, res) => {
-  console.log('=== createDepositGame Appelé ===');
+exports.createDepositGame = async ({ deposit_id, game_id, fees, price, quantity }) => {
   const transaction = await sequelize.transaction();
   try {
-    console.log('Données reçues:', req.body); 
-    const { deposit_id, game_id, fees, price, quantity } = req.body;
+    console.log('Données reçues:', { deposit_id, game_id, fees, price, quantity });
 
     // Vérifier que le Deposit existe
     const deposit = await Deposit.findByPk(deposit_id, { transaction });
@@ -29,23 +28,11 @@ exports.createDepositGame = async (req, res) => {
 
     console.log('Game trouvé:', game);
 
-    // Récupérer la session associée au deposit
-    const session = await Session.findByPk(deposit.session_id, { transaction });
-    if (!session) {
-      console.log(`Session avec ID ${deposit.session_id} non trouvée.`);
-      await transaction.rollback();
-      return res.status(404).json({ error: 'Session not found' });
-    }
-
-    console.log('Session trouvée:', session);
-
-    const depositGameFees = session.fees;
-      
     // Création de la ligne DepositGame
     const newDepositGame = await DepositGame.create({
       deposit_id,
       game_id,
-      fees: depositGameFees,
+      fees,
       price,
       quantity
       // label est auto-généré via un hook "beforeCreate"
@@ -90,14 +77,14 @@ exports.createDepositGame = async (req, res) => {
 
     await transaction.commit();
 
-    return res.status(201).json({
+    return {
       depositGame: newDepositGame,
       updatedStock: stock
-    });
+    };
   } catch (error) {
     console.error('Erreur lors de la création du DepositGame:', error);
     await transaction.rollback();
-    return res.status(500).json({ error: error.message });
+    throw error;
   }
 };
 
