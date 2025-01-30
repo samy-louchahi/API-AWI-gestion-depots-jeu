@@ -1,3 +1,4 @@
+const { where } = require('sequelize');
 const { DepositGame, Deposit,SaleDetail, Sale, Session } = require('../models');
 
 exports.getGlobalBalanceBySession = async (req, res) => {
@@ -5,20 +6,41 @@ exports.getGlobalBalanceBySession = async (req, res) => {
     const { session_id } = req.params;
 
     // 1) totalDepositFees : nombres de jeux vendus * session.fees
-    session = await DepositGame.findAll({
-      where: { session_id },
-      include: [{ model: Deposit, required: true }]
+    const session = await Session.findByPk(session_id);
+    const totalDepositFees = await DepositGame.sum('fees', {
+        where: { '$Deposit.session_id$': session_id },
+        include: [{
+            model: Deposit,
+            attributes: []
+        }],
     });
-    const totalDepositFees = session.reduce((acc, game) => {
-        return acc + (game.quantity * parseFloat(game.Deposit.fees));
-    }, 0);
+        // Optionnellement, définir `raw: true` si nécessaire
     
 
     // 2) totalSales : somme de Sale.sale_price
-    const totalSales = await Sale.sum('sale_price', { where: { session_id } });
+    const SaleDetails = await SaleDetail.findAll({
+        where: { '$Sale.session_id$': session_id },
+        include: [{
+            model: Sale,
+            attributes: []
+        }]
+        });
+    const depositGames = await DepositGame.findAll({
+        where: { '$Deposit.session_id$': session_id },
+        include: [{
+            model: Deposit,
+            attributes: []
+        }]
+    });
+    const totalSales = depositGames.reduce((acc, depositGame) => {
+        const saleDetail = SaleDetails.find(detail => detail.deposit_game_id === depositGame.deposit_game_id);
+        if (!saleDetail) return acc;
+        return acc + (saleDetail.quantity * parseFloat(depositGame.price));
+    }
+    , 0);
 
     // 3) totalCommission : somme de Sale.commission
-    const totalCommission = await Sale.sum('commission', { where: { session_id } });
+    const totalCommission = await (Session.sum('commission', {where: { session_id }})) || 0;
 
     // 4) Calcul
     const totalBenef = (totalSales - totalCommission) || 0;
