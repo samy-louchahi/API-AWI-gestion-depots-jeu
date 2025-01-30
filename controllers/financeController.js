@@ -1,20 +1,18 @@
-const { DepositGame, Deposit,SaleDetail, Sale } = require('../models');
+const { DepositGame, Deposit,SaleDetail, Sale, Session } = require('../models');
 
 exports.getGlobalBalanceBySession = async (req, res) => {
   try {
     const { session_id } = req.params;
 
-    // 1) totalDepositFees : somme de DepositGame.fees
-    //    pour tous depositGame dont deposit.session_id = session_id
-    const totalDepositFees = await DepositGame.sum('fees', {
-      include: [{
-        model: Deposit,
-        required: true,
-        where: { session_id }
-      }]
+    // 1) totalDepositFees : nombres de jeux vendus * session.fees
+    session = await DepositGame.findAll({
+      where: { session_id },
+      include: [{ model: Deposit, required: true }]
     });
-    // Note : sum(...) avec include requiert parfois l'option 'attributes: []' 
-    // ou un raw query. Tu peux selon la version de Sequelize ou tu peux faire un raw SQL.
+    const totalDepositFees = session.reduce((acc, game) => {
+        return acc + (game.quantity * parseFloat(game.Deposit.fees));
+    }, 0);
+    
 
     // 2) totalSales : somme de Sale.sale_price
     const totalSales = await Sale.sum('sale_price', { where: { session_id } });
@@ -53,7 +51,7 @@ exports.getVendorBalanceBySession = async (req, res) => {
             }],
             // Optionnellement, définir `raw: true` si nécessaire
         });
-
+        console.log('totalDepositFees:', totalDepositFees);
         // 2) Récupérer les détails des ventes pour le vendeur dans la session
         const saleDetails = await SaleDetail.findAll({
             where: { seller_id },
@@ -66,19 +64,18 @@ exports.getVendorBalanceBySession = async (req, res) => {
                 required: true
             }]
         });
-
+        session = await Session.findByPk(session_id);
         // 3) Calculer le total des ventes
         const totalSales = saleDetails.reduce((acc, detail) => {
             return acc + (detail.quantity * parseFloat(detail.DepositGame.price));
         }, 0);
 
         // 4) Calculer le total des commissions
-        const totalCommission = saleDetails.reduce((acc, detail) => {
-            return acc + (detail.quantity * parseFloat(detail.DepositGame.fees));
-        }, 0);
-
+        const totalCommission = totalSales * (session.commission / 100);
+        console.log('totalSales:', totalSales);
+        console.log('totalCommission:', totalCommission);
         // 5) Calculer le bénéfice total
-        const totalBenef = (totalSales - totalCommission) || 0;
+        const totalBenef = (totalSales - totalDepositFees - totalCommission) || 0;
 
         res.json({
             session_id: parseInt(session_id, 10),
