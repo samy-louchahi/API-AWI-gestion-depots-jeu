@@ -40,10 +40,11 @@ exports.getGlobalBalanceBySession = async (req, res) => {
     , 0);
 
     // 3) totalCommission : somme de Sale.commission
-    const totalCommission = await (Session.sum('commission', {where: { session_id }})) || 0;
+    const Commission = await (Session.sum('commission', {where: { session_id }})) || 0;
+    const totalCommission = totalSales * (Commission / 100);
 
     // 4) Calcul
-    const totalBenef = (totalSales - totalCommission) || 0;
+    const totalBenef = (totalSales - totalCommission - totalDepositFees) || 0;
 
     res.json({
       session_id,
