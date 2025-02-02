@@ -1,12 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
-const { authenticateToken, authorizeRole } = require('../middleware/authMiddleware');
+const { authenticateTokenAndRole} = require('../middleware/authMiddleware');
 const { body } = require('express-validator');
 
 // Middleware pour authentifier et autoriser uniquement les admins
-router.use(authenticateToken);
-router.use(authorizeRole('admin'));
+router.use(authenticateTokenAndRole('admin'));
 
 // Routes CRUD pour Admin
 router.post(

@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const gestionnaireController = require('../controllers/gestionnaireController');
-const { authenticateToken, authorizeRole } = require('../middleware/authMiddleware');
+const { authenticateTokenAndRole } = require('../middleware/authMiddleware');
 const { body } = require('express-validator');
 
 // Middleware pour authentifier et autoriser uniquement les gestionnaires
-router.use(authenticateToken);
+router.use(authenticateTokenAndRole('gestionnaire'));
 
 
 // Routes CRUD pour Gestionnaire

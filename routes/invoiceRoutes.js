@@ -1,9 +1,9 @@
 const express = require('express');
 const invoiceController = require('../controllers/invoiceController');
-const { authenticateToken } = require('../middleware/authMiddleware');
+const { authenticateTokenAndRole } = require('../middleware/authMiddleware');
 
 const router = express.Router();
-router.use(authenticateToken);
+router.use(authenticateTokenAndRole(['admin', 'gestionnaire']));
 
 router.use((req, res, next) => {
     if (req.user.role === 'admin' || req.user.role === 'gestionnaire') {

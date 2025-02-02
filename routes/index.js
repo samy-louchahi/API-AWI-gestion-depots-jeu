@@ -14,4 +14,5 @@ module.exports =  (app) => {
     app.use('/api/auth', require('./authRoutes'));
     app.use('/api/admins', require('./adminRoutes'));
     app.use('/api/gestionnaires', require('./gestionnaireRoutes'));
+    app.use('/api/csvImport', require('./csvImportRoutes'));
 };

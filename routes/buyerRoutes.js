@@ -1,12 +1,11 @@
 const express = require('express');
 const buyerController = require('../controllers/buyerController');
-const { authenticateToken, authorizeRole } = require('../middleware/authMiddleware');
+const { authenticateTokenAndRole } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
 // Middleware d'authentification
-router.use(authenticateToken);
-router.use(authorizeRole(['admin', 'gestionnaire']));
+router.use(authenticateTokenAndRole(['admin', 'gestionnaire']));
 
 // Middleware d'autorisation des rôles
 router.use((req, res, next) => {

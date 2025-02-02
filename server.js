@@ -25,7 +25,8 @@ updateSessionStatus();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
+const path = require('path');
+app.use('/games-pictures', express.static(path.join(__dirname, 'games-pictures')));
 // Routes
 require('./routes')(app);
 

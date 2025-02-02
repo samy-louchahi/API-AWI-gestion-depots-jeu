@@ -1,5 +1,3 @@
-// src/tasks/updateSessionStatus.js
-
 const { Session } = require('../models');
 const { Op } = require('sequelize');
 
@@ -10,36 +8,33 @@ const updateSessionStatus = async () => {
     try {
         const currentDate = new Date();
 
-        // Mettre à jour les sessions actives
+        // Passer en zone locale et ajuster la date de demain à minuit
+        const tomorrowMidnight = new Date(currentDate);
+        tomorrowMidnight.setDate(currentDate.getDate() + 1);
+        tomorrowMidnight.setHours(0, 0, 0, 0);
+
+        console.log('Current Date:', currentDate);
+        console.log('Tomorrow Midnight Local:', tomorrowMidnight);
+
+        // Sessions actives
         await Session.update(
             { status: true },
             {
                 where: {
                     start_date: { [Op.lte]: currentDate },
-                    end_date: { [Op.gte]: currentDate },
-                    status: false // Optimisation: ne mettre à jour que si le statut est faux
+                    end_date: { [Op.gte]: currentDate },  // Actives aujourd'hui inclus
+                    status: false
                 }
             }
         );
 
-        // Mettre à jour les sessions terminées
+        // Sessions terminées avec <= et ajustement
         await Session.update(
             { status: false },
             {
                 where: {
-                    end_date: { [Op.lt]: currentDate },
-                    status: true // Optimisation: ne mettre à jour que si le statut est vrai
-                }
-            }
-        );
-
-        // Mettre à jour les sessions à venir
-        await Session.update(
-            { status: false },
-            {
-                where: {
-                    start_date: { [Op.gt]: currentDate },
-                    status: true // Optimisation: ne mettre à jour que si le statut est vrai
+                    end_date: { [Op.lte]: tomorrowMidnight }, // Inférieur ou égal avec gestion correcte de la zone horaire
+                    status: true
                 }
             }
         );
