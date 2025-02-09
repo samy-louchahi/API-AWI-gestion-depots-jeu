@@ -1,69 +1,45 @@
-const stockController = require('./stockController');
-const { DepositGame, Deposit, Game, Stock , Session} = require('../models'); 
+// controllers/depositGameController.js
+const { DepositGame, Deposit, Game, Stock } = require('../models');
 const sequelize = require('../models/index').sequelize;
 
-// CREATE
-exports.createDepositGame = async ({ deposit_id, game_id, fees, price, quantity }) => {
+exports.createDepositGame = async ({ deposit_id, game_id, fees, quantity, exemplaires }) => {
   const transaction = await sequelize.transaction();
   try {
-    console.log('Données reçues:', { deposit_id, game_id, fees, price, quantity });
+    console.log('Données reçues:', { deposit_id, game_id, fees, quantity, exemplaires });
 
     // Vérifier que le Deposit existe
     const deposit = await Deposit.findByPk(deposit_id, { transaction });
     if (!deposit) {
-      console.log(`Deposit avec ID ${deposit_id} non trouvé.`);
       await transaction.rollback();
-      return res.status(404).json({ error: 'Deposit not found' });
+      return { status: 404, error: 'Deposit not found' };
     }
-
-    console.log('Deposit trouvé:', deposit);
 
     // Vérifier que le Game existe
     const game = await Game.findByPk(game_id, { transaction });
     if (!game) {
-      console.log(`Game avec ID ${game_id} non trouvé.`);
       await transaction.rollback();
-      return res.status(404).json({ error: 'Game not found' });
+      return { status: 404, error: 'Game not found' };
     }
 
-    console.log('Game trouvé:', game);
-
-    // Création de la ligne DepositGame
+    // Créer le DepositGame
     const newDepositGame = await DepositGame.create({
       deposit_id,
       game_id,
       fees,
-      price,
-      quantity
-      // label est auto-généré via un hook "beforeCreate"
+      exemplaires // Ce champ est maintenant un tableau d'objets
     }, { transaction });
 
-    console.log('DepositGame créé:', newDepositGame);
-
-    // ---- MISE À JOUR DU STOCK ----
-    // Récupérer session_id et seller_id depuis le deposit
-    const { session_id, seller_id } = deposit; 
-    console.log(`Mise à jour du stock pour seller_id: ${seller_id}, session_id: ${session_id}, game_id: ${game_id}, quantity: ${quantity}`);
-
-    // Vérifier s'il existe déjà une ligne de stock pour (session_id, seller_id, game_id)
+    // Mise à jour du stock (la quantité correspond au nombre d'exemplaires)
+    const { session_id, seller_id } = deposit;
     let stock = await Stock.findOne({
-      where: {
-        session_id,
-        seller_id,
-        game_id
-      }
+      where: { session_id, seller_id, game_id }
     }, { transaction });
 
     if (stock) {
-      console.log('Stock existant trouvé:', stock);
-      // Incrémente la quantité basée sur `quantity`
       stock.initial_quantity += quantity;
       stock.current_quantity += quantity;
       await stock.save({ transaction });
-      console.log('Stock mis à jour:', stock);
     } else {
-      console.log('Aucun stock existant trouvé. Création d\'un nouveau stock.');
-      // Créer une nouvelle ligne stock
       stock = await Stock.create({
         session_id,
         seller_id,
@@ -71,16 +47,10 @@ exports.createDepositGame = async ({ deposit_id, game_id, fees, price, quantity 
         initial_quantity: quantity,
         current_quantity: quantity
       }, { transaction });
-      console.log('Nouveau stock créé:', stock);
     }
-    // ---- FIN MISE À JOUR DU STOCK ----
 
     await transaction.commit();
-
-    return {
-      depositGame: newDepositGame,
-      updatedStock: stock
-    };
+    return { depositGame: newDepositGame, updatedStock: stock };
   } catch (error) {
     console.error('Erreur lors de la création du DepositGame:', error);
     await transaction.rollback();
@@ -91,9 +61,8 @@ exports.createDepositGame = async ({ deposit_id, game_id, fees, price, quantity 
 // READ ALL
 exports.getAllDepositGames = async (req, res) => {
   try {
-    // On peut inclure les infos du dépôt et du jeu si besoin
     const depositGames = await DepositGame.findAll({
-      include: [Deposit, Game] 
+      include: [Deposit, Game]
     });
     return res.json(depositGames);
   } catch (error) {
@@ -106,9 +75,7 @@ exports.getAllDepositGames = async (req, res) => {
 exports.getDepositGameById = async (req, res) => {
   try {
     const { id } = req.params;
-    const depositGame = await DepositGame.findByPk(id, {
-      include: [Deposit, Game]
-    });
+    const depositGame = await DepositGame.findByPk(id, { include: [Deposit, Game] });
     if (!depositGame) {
       return res.status(404).json({ error: 'DepositGame not found' });
     }
@@ -123,23 +90,21 @@ exports.getDepositGameById = async (req, res) => {
 exports.updateDepositGame = async (req, res) => {
   try {
     const { id } = req.params;
-    const { deposit_id, game_id, fees, price } = req.body;
+    const { deposit_id, game_id, fees, states, prices } = req.body;
 
     const depositGame = await DepositGame.findByPk(id);
     if (!depositGame) {
       return res.status(404).json({ error: 'DepositGame not found' });
     }
 
-    // Mise à jour des champs
-    // Attention : le label est généralement unique et géré par le hook,
-    // on ne le modifie pas. On peut s'abstenir de le toucher.
     depositGame.deposit_id = deposit_id || depositGame.deposit_id;
     depositGame.game_id = game_id || depositGame.game_id;
     depositGame.fees = fees !== undefined ? fees : depositGame.fees;
-    depositGame.price = price !== undefined ? price : depositGame.price;
+    // Autoriser la mise à jour des tableaux states et prices si fournis
+    if (states) depositGame.states = states;
+    if (prices) depositGame.prices = prices;
 
     await depositGame.save();
-
     return res.json(depositGame);
   } catch (error) {
     console.error(error);
@@ -155,7 +120,6 @@ exports.deleteDepositGame = async (req, res) => {
     if (!depositGame) {
       return res.status(404).json({ error: 'DepositGame not found' });
     }
-
     await depositGame.destroy();
     return res.json({ message: 'DepositGame deleted successfully' });
   } catch (error) {

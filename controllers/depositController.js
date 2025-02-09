@@ -58,13 +58,13 @@ module.exports = {
             deposit_id: newDeposit.deposit_id,
             ...g
         });
-          await deposit_game_controller.createDepositGame({
-            deposit_id: newDeposit.deposit_id,
-            game_id: g.game_id,
-            price: g.price,
-            quantity: g.quantity || 1, // Assurez-vous d'avoir une quantité par défaut
-            fees: session.fees // Utiliser les frais de la session
-          });
+        await deposit_game_controller.createDepositGame({
+          deposit_id: newDeposit.deposit_id,
+          game_id: g.game_id,
+          fees: session.fees,              // ou fees extrait de g
+          quantity: g.quantity || 1, // Quantité par défaut
+          exemplaires: g.exemplaires // Transmettez le champ exemplaires tel quel
+        });
         }
       }
 

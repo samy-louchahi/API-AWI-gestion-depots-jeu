@@ -1,6 +1,4 @@
-// depositGame.js
-const { v4: uuidv4 } = require('uuid'); // ou nanoid, shortid, etc.
-
+// models/depositGame.js
 'use strict';
 const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
@@ -10,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
       DepositGame.belongsTo(models.Game, { foreignKey: 'game_id' });
     }
   }
+
   DepositGame.init({
     deposit_game_id: {
       type: DataTypes.INTEGER,
@@ -25,10 +24,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DECIMAL(5, 2),
       allowNull: false
     },
-    price: {
-        type: DataTypes.DECIMAL,
-        allowNull: false
-    },
     deposit_id: {
       type: DataTypes.INTEGER,
       allowNull: false
@@ -37,19 +32,19 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    quantity: {
-        type: DataTypes.INTEGER,
-        allowNull:
-        false,
-        defaultValue: 0
+    exemplaires: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      defaultValue: [] // Par défaut, aucun exemplaire n'est déposé
     }
   }, {
     sequelize,
     modelName: 'DepositGame',
     tableName: 'deposit_games'
   });
+
   DepositGame.addHook('beforeCreate', (depositGame) => {
-    depositGame.label = uuidv4(); // Génère un label unique
+    depositGame.label = require('uuid').v4(); // Génère un label unique
   });
 
   return DepositGame;
