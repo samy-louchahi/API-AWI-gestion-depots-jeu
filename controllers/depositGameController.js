@@ -2,10 +2,10 @@
 const { DepositGame, Deposit, Game, Stock } = require('../models');
 const sequelize = require('../models/index').sequelize;
 
-exports.createDepositGame = async ({ deposit_id, game_id, fees, quantity, exemplaires }) => {
+exports.createDepositGame = async ({ deposit_id, game_id, fees,  exemplaires }) => {
   const transaction = await sequelize.transaction();
   try {
-    console.log('Données reçues:', { deposit_id, game_id, fees, quantity, exemplaires });
+    console.log('Données reçues:', { deposit_id, game_id, fees,  exemplaires });
 
     // Vérifier que le Deposit existe
     const deposit = await Deposit.findByPk(deposit_id, { transaction });
@@ -36,16 +36,16 @@ exports.createDepositGame = async ({ deposit_id, game_id, fees, quantity, exempl
     }, { transaction });
 
     if (stock) {
-      stock.initial_quantity += quantity;
-      stock.current_quantity += quantity;
+      stock.initial_quantity += exemplaires.length ?? 0;
+      stock.current_quantity +=  exemplaires.length ?? 0;
       await stock.save({ transaction });
     } else {
       stock = await Stock.create({
         session_id,
         seller_id,
         game_id,
-        initial_quantity: quantity,
-        current_quantity: quantity
+        initial_quantity: exemplaires?.length ?? 0,
+        current_quantity: exemplaires?.length ?? 0
       }, { transaction });
     }
 
