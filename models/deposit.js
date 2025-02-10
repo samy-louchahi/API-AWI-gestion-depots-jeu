@@ -34,6 +34,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
+    tag: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true
+    },
     discount_fees: {
       type: DataTypes.DECIMAL(5, 2),
       allowNull: true,
@@ -45,7 +50,11 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Deposit',
-    tableName: 'deposits'
+    tableName: 'deposits',
+  });
+  Deposit.addHook('beforeCreate', (deposit) => {
+    const timestamp = new Date().toISOString().replace(/[-T:.Z]/g, '').slice(0, 12); // Format YYMMDDHHMM
+    deposit.tag = `DEP-${timestamp}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
   });
   return Deposit;
 };

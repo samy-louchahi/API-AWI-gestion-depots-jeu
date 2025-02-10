@@ -13,10 +13,12 @@ router.use((req, res, next) => {
     }
 });
 
-router.post('/', invoiceController.createInvoice);
+//router.post('/', invoiceController.createInvoice);
+router.post('/:sale_id', invoiceController.generateInvoicePDF);
 router.get('/', invoiceController.findAllInvoices);
 router.get('/:id', invoiceController.findInvoiceById);
 router.put('/:id', invoiceController.updateInvoice);
 router.delete('/:id', invoiceController.deleteInvoice);
+
 
 module.exports = router;

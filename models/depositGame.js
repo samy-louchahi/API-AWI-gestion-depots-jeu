@@ -15,11 +15,6 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
-    label: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      unique: true
-    },
     fees: {
       type: DataTypes.DECIMAL(5, 2),
       allowNull: false
@@ -42,10 +37,5 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'DepositGame',
     tableName: 'deposit_games'
   });
-
-  DepositGame.addHook('beforeCreate', (depositGame) => {
-    depositGame.label = require('uuid').v4(); // Génère un label unique
-  });
-
   return DepositGame;
 };

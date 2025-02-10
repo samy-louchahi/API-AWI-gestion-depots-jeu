@@ -2,10 +2,11 @@
 const { DepositGame, Deposit, Game, Stock } = require('../models');
 const sequelize = require('../models/index').sequelize;
 
-exports.createDepositGame = async ({ deposit_id, game_id, fees,  exemplaires }) => {
+
+exports.createDepositGame = async ({ deposit_id, game_id, fees, exemplaires }) => {
   const transaction = await sequelize.transaction();
   try {
-    console.log('Données reçues:', { deposit_id, game_id, fees,  exemplaires });
+    console.log('Données reçues:', { deposit_id, game_id, fees, exemplaires });
 
     // Vérifier que le Deposit existe
     const deposit = await Deposit.findByPk(deposit_id, { transaction });
@@ -21,23 +22,22 @@ exports.createDepositGame = async ({ deposit_id, game_id, fees,  exemplaires }) 
       return { status: 404, error: 'Game not found' };
     }
 
-    // Créer le DepositGame
+
+    // Créer le DepositGame avec le label
     const newDepositGame = await DepositGame.create({
       deposit_id,
       game_id,
       fees,
-      exemplaires // Ce champ est maintenant un tableau d'objets
+      exemplaires,
     }, { transaction });
 
-    // Mise à jour du stock (la quantité correspond au nombre d'exemplaires)
+    // Mise à jour du stock
     const { session_id, seller_id } = deposit;
-    let stock = await Stock.findOne({
-      where: { session_id, seller_id, game_id }
-    }, { transaction });
+    let stock = await Stock.findOne({ where: { session_id, seller_id, game_id } }, { transaction });
 
     if (stock) {
       stock.initial_quantity += exemplaires.length ?? 0;
-      stock.current_quantity +=  exemplaires.length ?? 0;
+      stock.current_quantity += exemplaires.length ?? 0;
       await stock.save({ transaction });
     } else {
       stock = await Stock.create({

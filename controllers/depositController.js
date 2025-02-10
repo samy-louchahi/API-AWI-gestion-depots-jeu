@@ -40,12 +40,11 @@ module.exports = {
         seller_id,
         session_id,
         deposit_date,
-        discount_fees
+        discount_fees,
       });
 
 
       // Créer les DepositGame s'il y a un tableau "games"
-      // Chaque DepositGame aura un label auto-généré via le hook beforeCreate (dans DepositGame)
       if (Array.isArray(games)) {
         for (const g of games) {
           // Vérifier que le jeu existe
