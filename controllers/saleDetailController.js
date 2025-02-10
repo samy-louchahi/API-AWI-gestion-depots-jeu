@@ -1,5 +1,5 @@
 const { where } = require('sequelize');
-const { SaleDetail, Sale, DepositGame, Deposit, Seller, Stock } = require('../models');
+const { SaleDetail, Sale, DepositGame, Deposit, Seller, Stock, Game } = require('../models');
 
 module.exports = {
   /**
@@ -10,13 +10,14 @@ module.exports = {
     try {
       const { sale_id, deposit_game_id, quantity } = req.body;
 
-      // 1. Vérifier que la vente (Sale) existe
+      // 1) Vérifier la vente
       const sale = await Sale.findByPk(sale_id);
       if (!sale) {
         return res.status(404).json({ error: 'Sale not found' });
       }
 
-      // 2. Vérifier que le DepositGame existe avec l'association Deposit et Seller
+      // 2) Vérifier le DepositGame
+      //    inclure: [Deposit, Game, Seller => via Deposit, etc.]
       const depositGame = await DepositGame.findByPk(deposit_game_id, {
         include: [
           {
@@ -26,8 +27,12 @@ module.exports = {
               {
                 model: Seller,
                 as: 'Seller'
-              }
+              },
             ]
+          },
+          {
+            model: Game,
+            as: 'Game'
           }
         ]
       });
@@ -35,13 +40,13 @@ module.exports = {
         return res.status(404).json({ error: 'DepositGame not found' });
       }
 
-      // 3. Récupérer le seller_id à partir de DepositGame -> Deposit -> Seller
+      // 3) Récupérer le seller_id via depositGame.Deposit
       const seller = depositGame.Deposit?.Seller;
       if (!seller) {
         return res.status(400).json({ error: 'Seller not found for this DepositGame' });
       }
 
-      // 4. Créer le SaleDetail avec seller_id
+      // 4) Créer le SaleDetail
       const newSaleDetail = await SaleDetail.create({
         sale_id,
         deposit_game_id,
@@ -49,15 +54,16 @@ module.exports = {
         seller_id: seller.seller_id
       });
 
-      // 5. Mettre à jour le stock
-      if(depositGame){
-        game_id = depositGame.game_id;
-          stock = await Stock.findOne({ where: { game_id } });
-          if (stock) {
-            stock.current_quantity -= quantity;
-            await stock.save();
-          }
+      // 5) Mettre à jour le stock si besoin
+      if (depositGame) {
+        const game_id = depositGame.game_id;
+        const stock = await Stock.findOne({ where: { game_id } });
+        if (stock) {
+          stock.current_quantity -= quantity;
+          await stock.save();
+        }
       }
+
       return res.status(201).json(newSaleDetail);
     } catch (error) {
       console.error(error);
@@ -84,7 +90,10 @@ module.exports = {
             model: Sale,
             include: [/* Ajouter d'autres modèles si nécessaire */]
           },
-          DepositGame
+          {
+          model: DepositGame,
+          include: [Game]
+          }
         ]
       });
 

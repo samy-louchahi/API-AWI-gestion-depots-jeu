@@ -1,6 +1,6 @@
 // saleController.js
 
-const { Sale, Buyer, Session, SaleDetail, DepositGame } = require('../models');
+const { Sale, Buyer, Session, SaleDetail, DepositGame, Game } = require('../models');
 
 module.exports = {
   /**
@@ -50,7 +50,7 @@ module.exports = {
         include: [
             Buyer,
             Session,
-            { model: SaleDetail, include: [DepositGame] }
+            { model: SaleDetail, include: [{model: DepositGame, include: [{model: Game}]}] }
           ]
       });
       return res.json(sales);
@@ -67,7 +67,7 @@ module.exports = {
     try {
       const { id } = req.params;
       const sale = await Sale.findByPk(id, {
-        include: [Buyer, Session]
+        include: [Buyer, Session,  { model: SaleDetail, include: [{model: DepositGame, include: [{model: Game}]}] }]
       });
       if (!sale) {
         return res.status(404).json({ error: 'Sale not found' });
